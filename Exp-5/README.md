@@ -1,4 +1,4 @@
-# Experiment 5: ARP Spoofing and HTTP Session Security
+# Experiment 5: ARP Spoofing and Session Hijacking
 
 ## Aim
 
@@ -38,11 +38,19 @@ HTTP does not encrypt its contents. If a web application sends a session cookie 
 
 **How the concepts connect:** ARP spoofing may redirect local traffic; packet capture can then be used to inspect traffic that is visible to the tester; and HTTP traffic may expose sensitive data if the application sends it without encryption.
 
-## Procedure and Screenshot Evidence
+## Procedure
 
 The screenshots below follow the lab workflow. Each one is placed next to the concept it demonstrates.
 
-### Step 1: Check the Metasploitable network
+### Step 1: Check the Kali network
+
+On Kali, use `ip a` to confirm that `eth0` is up and has the expected lab address.
+
+The screenshot shows `eth0` configured as `192.168.188.128/24`, placing Kali and Metasploitable on the same subnet.
+
+![Step 1: Kali eth0 address](Screenshots/Step1.png)
+
+### Step 2: Check the Metasploitable network
 
 On Metasploitable 2, use `ip a` to identify its address and ping the gateway to check basic connectivity.
 
@@ -53,19 +61,7 @@ ping -c 2 192.168.188.2
 
 The screenshot shows the Metasploitable address (`192.168.188.134`), successful replies from the gateway, and its interface configuration.
 
-![Step 1: Metasploitable IP address and gateway connectivity](Screenshots/Screenshot%202026-10-15%20175614.png)
-
-### Step 2: Check the Kali network
-
-On Kali, confirm that `eth0` is up and has the expected lab address.
-
-```bash
-ip a
-```
-
-The screenshot shows `eth0` configured as `192.168.188.128/24`, placing Kali and Metasploitable on the same subnet.
-
-![Step 2: Kali eth0 address](Screenshots/Screenshot%202026-10-15%20175839.png)
+![Step 2: Metasploitable IP address and gateway connectivity](Screenshots/Step2.png)
 
 ### Step 3: Send false gateway information to the victim
 
@@ -78,7 +74,7 @@ sudo arpspoof -i eth0 -t 192.168.188.134 192.168.188.2
 
 The repeated ARP replies in the screenshot are evidence that `arpspoof` is running in this direction. They do not, by themselves, confirm that both directions of the traffic are being intercepted.
 
-![Step 3: ARP replies sent to the victim](Screenshots/Screenshot%202026-10-15%20175549.png)
+![Step 3: ARP replies sent to the victim](Screenshots/Step3.png)
 
 ### Step 4: Send false victim information to the gateway
 
@@ -88,7 +84,7 @@ In a second Kali terminal, run the reverse command. This sends ARP replies to th
 sudo arpspoof -i eth0 -t 192.168.188.2 192.168.188.134
 ```
 
-![Step 4: ARP replies sent to the gateway](Screenshots/Screenshot%202026-10-15%20175941.png)
+![Step 4: ARP replies sent to the gateway](Screenshots/Step4.png)
 
 ### Step 5: Capture traffic and log in to DVWA
 
@@ -96,7 +92,7 @@ Start capturing on Kali's `eth0` in Wireshark. In the lab browser, open `http://
 
 The browser screenshot shows the DVWA page and the authenticated `admin` session. This confirms the lab login; it is not evidence that the session was hijacked.
 
-![Step 5: Authenticated DVWA page](Screenshots/Screenshot%202026-10-15%20175700.png)
+![Step 5: Authenticated DVWA page](Screenshots/Step5.png)
 
 ### Step 6: Inspect the HTTP packets
 
@@ -104,7 +100,7 @@ In Wireshark, apply the display filter `http` to find the web traffic.
 
 The screenshot shows HTTP packets exchanged between `192.168.188.128` (Kali) and `192.168.188.134` (Metasploitable). HTTP does not encrypt the packet contents. However, the screenshot does not show a session cookie or prove that a cookie was extracted or reused.
 
-![Step 6: HTTP packets between Kali and Metasploitable](Screenshots/Screenshot%202026-10-15%20175909.png)
+![Step 6: HTTP packets between Kali and Metasploitable](Screenshots/Step6.png)
 
 ## Result
 
