@@ -55,41 +55,41 @@ sudo sysctl -w net.ipv4.ip_forward=1
 
 ### Step 4: Start ARP spoofing in both directions
 
-Open two Kali terminal windows. Run one command in each so the victim and gateway both send their traffic through Kali.
+Open two Kali terminal windows. Run one command in each so the victim and gateway both send their traffic through Kali. The screenshots below follow the order in which the two commands were run.
 
-In the first terminal, target the victim:
-```bash
-sudo arpspoof -i eth0 -t 192.168.188.134 192.168.188.2
-```
-
-![Step 4a: ARP spoofing toward the victim](Screenshots/Screenshot%202026-10-15%20175941.png)
-
-In the second terminal, target the gateway:
+In the first terminal, poison the gateway's ARP entry for the victim:
 ```bash
 sudo arpspoof -i eth0 -t 192.168.188.2 192.168.188.134
 ```
 
-![Step 4b: ARP spoofing toward the gateway](Screenshots/Screenshot%202026-10-15%20175700.png)
+![Step 4a: ARP spoofing toward the gateway](Screenshots/Screenshot%202026-10-15%20175700.png)
 
-### Step 5: Start capturing HTTP traffic
+In the second terminal, poison the victim's ARP entry for the gateway:
+```bash
+sudo arpspoof -i eth0 -t 192.168.188.134 192.168.188.2
+```
 
-In Wireshark, start capturing on `eth0` before logging in to DVWA. After the login, use the display filter `http` to show the captured HTTP packets.
+![Step 4b: ARP spoofing toward the victim](Screenshots/Screenshot%202026-10-15%20175941.png)
 
-![Step 5: HTTP packets shown in Wireshark](Screenshots/Screenshot%202026-10-15%20175909.png)
+### Step 5: Start a Wireshark capture
 
-### Step 6: Log in to DVWA and inspect the captured request
+In Wireshark, start capturing on `eth0` before logging in to DVWA. Use the display filter `http` to find the captured HTTP packets.
 
-On the victim machine, open `http://192.168.188.134/dvwa/` and sign in using the lab account (`admin` / `password`). In Wireshark, inspect the HTTP request and locate the `PHPSESSID` cookie. Keep the cookie within this isolated lab; it acts like a temporary password for the session.
+### Step 6: Log in to DVWA
 
-### Step 7: Verify session reuse in the lab
+On the victim machine, open `http://192.168.188.134/dvwa/` and sign in using the lab account (`admin` / `password`).
 
-In a separate browser session on the lab machine, use the captured `PHPSESSID` cookie with the browser's developer tools or a cookie editor, then reload DVWA. If the session is accepted, the page opens as the authenticated user without logging in again. The screenshot shows the authenticated DVWA page.
+![Step 6: DVWA page after login](Screenshots/Screenshot%202026-10-15%20175839.png)
 
-![Step 7: Authenticated DVWA page](Screenshots/Screenshot%202026-10-15%20175839.png)
+### Step 7: Inspect the captured HTTP traffic
+
+In Wireshark, apply the `http` display filter and inspect the HTTP packets captured during the login. In an authorized lab, the session cookie may be visible because HTTP does not encrypt it. Treat the cookie as a temporary password and do not share it.
+
+![Step 7: HTTP packets displayed in Wireshark](Screenshots/Screenshot%202026-10-15%20175909.png)
 
 ## Result
 
-The lab demonstrated ARP spoofing between the victim and gateway, captured HTTP traffic in Wireshark, and reused the DVWA session cookie to access the authenticated page. This illustrates why web applications should use HTTPS and protect session cookies.
+The lab demonstrated ARP spoofing between the victim and gateway and captured HTTP traffic during a DVWA login. This illustrates why web applications should use HTTPS and protect session cookies.
 
 ## Conclusion
 
