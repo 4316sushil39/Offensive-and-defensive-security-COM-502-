@@ -12,6 +12,10 @@ To use OWASP ZAP to scan the DVWA web application in an authorized lab and revie
 
 Only scan systems that you own or have permission to test. Keep this experiment in your isolated lab.
 
+## Theory
+
+DVWA (Damn Vulnerable Web Application) is an intentionally vulnerable website used for security practice. OWASP ZAP (Zed Attack Proxy) is a web security testing tool that can send requests to a website and report possible vulnerabilities. Its automated scan explores the site and checks the pages it can reach. The results are alerts that should be reviewed and verified; they are not automatically proof that a vulnerability can be exploited.
+
 ## Procedure
 
 ### Step 1: Find the Metasploitable IP address
